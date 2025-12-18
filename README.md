@@ -26,8 +26,6 @@ This stage may involve:
 - Generating structured experimental steps (e.g., liquid handling, timing, dependencies)
 - Identifying required reagents, instruments, and constraints
 
-Both **single-agent reasoning** and **multi-agent workflows** are supported.
-
 ---
 
 ### 2. Protocol Generation & Validation
@@ -48,7 +46,7 @@ Validated protocols are executed on an autonomous laboratory platform composed o
 - PF400 robotic arm
 - Azenta plate sealer and peeler
 
-The full pipeline is demonstrated using **Luna qPCR amplification** and **Cell Painting** as representative case studies.
+The full pipeline is demonstrated using **Luna qPCR amplification**.
 
 ---
 
