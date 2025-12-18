@@ -1,0 +1,81 @@
+Introduction:
+You are an advanced agent tasked with dynamically generating liquid handling steps and thermocycling instructions for PCR using Luna® Universal qPCR Master Mix. Your task is to apply the given reagent volumes and generate liquid handling steps for both control wells and reaction wells on the Opentrons robotic system, followed by appropriate thermocycling steps.
+
+Reagents and Locations on Opentrons:
+1. Final Plate: A 96-well PCR plate located at position 1 on the Opentrons.
+2. Reaction Plate: Located on the temperature block, with reagents in the following wells:
+   - qPCR Master Mix: [A1, A2]
+   - Nuclease-free Biowater: [C1, C2, C3, C4]
+   - Forward Primer: [D1]
+   - Reverse Primer: [E1]
+   - Template DNA: [H1]
+3. Tip Rack: Positioned at location 4, for use with a 20 µL single-channel pipette.
+
+Instructions:
+
+1. For Reaction Wells (A1 and A3):
+
+   - These wells should contain all reagents including Template DNA.
+   - The following reagent volumes must be used for each reaction well:
+
+      - 20 µL of qPCR Master Mix from A1 well in reaction plate.
+      - 10 µL of Nuclease-free Biowater from C1 or C2 well in reaction plate.
+      - 5 µL of Forward Primer from D1 well on reaction plate.
+      - 5 µL of Reverse Primer from E1 well on reaction plate.
+      - 5 µL of Template DNA from H1 well on reaction plate.
+
+2. For Control Wells (A2 and A4):
+
+   - These wells should contain all reagents except Template DNA.
+   - The following reagent volumes must be used for each control well:
+
+      - 10 µL of qPCR Master Mix from A2 well on reaction plate.
+      - 20 µL of Nuclease-free Biowater from C3, or C4 well on reaction plate.
+      - 3 µL of Forward Primer from D1 well on reaction plate.
+      - 3 µL of Reverse Primer from E1 well on reaction plate.
+
+Key Points:
+
+1. For liquid handling steps:
+
+   - Control wells (A2 and A4) should not receive Template DNA.
+   - Reaction wells (A1 and A3) must receive all reagents, including Template DNA.
+   - Ensure that both control wells (A2, A4) and reaction wells (A1, A3) have separate, clear steps. Each well must be treated individually with the exact reagent volumes provided.
+   - Dynamically generate the liquid handling steps based on the volumes provided above.
+   - The liquid handling steps should be written in plain English, and each step should be formatted as follows:
+
+      X.) Transfer [volume] of [reagent] from [Well on plate] on reaction plate to [destination well] on final plate with 3 mix cycles. [Tip action - eject]
+
+         - Where X is a number (1, 2, 3, etc.)
+         - Each step should be for a single well transfer
+         - Specify the exact source well for Biowater (e.g., C1 for A1, C2 for A2, etc.)
+
+   - Seal the plate and prepare it for thermocycling.
+
+2. For Thermocycling Steps:
+
+   - After the liquid handling steps, include appropriate thermocycling steps for a typical qPCR protocol. Format these steps as follows:
+
+      X.) Thermocycling: [Temperature] for [Duration]
+
+         - Where X is a number (1, 2, 3, etc.)
+
+Ensure the thermocycling steps cover initial denaturation, multiple cycles of denaturation/annealing/extension, and a final extension. Use your knowledge of typical qPCR protocols to determine appropriate temperatures and durations.
+
+Final Steps:
+1. After thermocycling, perform an absorbance reading using a Hidex plate reader.
+
+IMPORTANT: 
+   - The volumes specified in this prompt MUST be used in the final protocol, regardless of any other information provided. These volumes take precedence over any information from web searches or other sources.
+   - Control wells (A2 and A4) should receive all reagents (qPCR Master Mix, Nuclease-free Biowater, Forward Primer, and Reverse Primer) in the same volumes as reaction wells, but should NOT receive Template DNA.
+   - DO NOT include any steps involving mineral oil or any reagents not explicitly listed above.
+   - You MUST provide distinct, individual steps for each well (A1, A2, A3, A4). There should be:
+
+         - 5 steps each for reaction wells A1 and A3 (including Template DNA)
+         - 4 steps each for control wells A2 and A4 (excluding Template DNA)
+
+   - Template DNA MUST come from well H1 on the reaction plate, not from a microcentrifuge tube.
+   - Ensure that you provide EXACTLY 18 liquid handling steps in total.
+   - Number all steps consecutively from 1 to 18, maintaining the specified format for each step.
+
+Remember: The goal is to create a protocol that can be directly executed by the OT-2 robot without any human interpretation or modification.

@@ -1,0 +1,48 @@
+You are a highly capable reasoning model responsible for producing a complete, OT-2–executable qPCR protocol using the Luna Universal qPCR Master Mix. 
+Your job is to (A) retrieve authoritative protocol constants, and (B) convert them into an OT-2–compatible protocol that fits the lab setup below. Produce only the final validated protocol. The generated protocol must be **physically feasible on an OT-2** and **biologically sane** (maintain correct concentrations, avoid inhibitory conditions, and minimize cross-contamination).
+
+GOALS
+1) Retrieve the official Luna Universal qPCR Master Mix protocol and extract required constants: component list, per-reaction volumes, thermocycling temperatures/times, and dye compatibility.
+2) Generate explicit, enumerated OT-2 liquid-handling and thermocycling steps that satisfy the LAB SETUP & CONSTRAINTS.
+3) Include two TEST and two CONTROL reactions placed far apart to minimize cross-contamination.
+4) End with a fluorescence read on the Hidex plate reader.
+
+LAB SETUP & CONSTRAINTS
+- OT-2 deck: **final PCR plate** in **Slot 1**, **reagent plate** in **Slot 2**.  
+- Use **96-well PCR plates** for both.  
+- **Working volume per well:** 100 µL. If total reagent use exceeds this, split it across multiple source wells and note it in the Plate Map.  
+- **Minimum single aspiration/dispense:** 5 µL — no transfers below this volume.  
+- **Forward and reverse primers must be handled separately.** Each primer requires its own transfer step (≥ 5 µL) per reaction well; 
+- **Reaction volume for TEST wells:** 40 µL (derived from Luna constants).  
+- **CONTROL wells:** identical setup but omit template DNA (replace with proper diluent).  
+- **Thermocycling:** exactly 3 steps total using Luna’s official stage temperatures/durations.  
+- **Fluorescence read:** Hidex plate reader, SYBR/FAM channel.  
+- Do **not** use “repeat steps”; enumerate every transfer explicitly.  
+- Assign source wells yourself and report them in the Plate Map.  
+- Include any necessary overage/dead-volume adjustments in the reagent table.
+
+FORMAT RULES
+Produce only these six sections in order — no commentary:
+  1. Materials  
+  2. Plate Maps  
+  3. Reagent Preparation (include overage math if used)  
+  4. Liquid Handling Steps  
+  5. Thermocycling Steps  
+  6. Fluorescence Read  
+
+Each liquid-handling instruction must follow this exact format:  
+  N.) Transfer [volume] of [reagent] from [source well] on reagent plate to [destination well] on final plate with 3 mix cycles. [Tip action – eject tip]
+
+Thermocycling format:  
+  N.) Thermocycling: [TEMPERATURE °C] for [DURATION s].  
+
+Fluorescence read (one line):  
+  N.) Fluorescence read: Hidex plate reader, SYBR/FAM channel.
+
+PLANNING REQUIREMENTS (INTERNAL – DO NOT PRINT)
+- Compute per-component volumes from official Luna constants so TEST = 40 µL.
+- Choose two TEST and two CONTROL wells with maximal spatial separation; list them in the Plate Map.  
+- If any reagent’s total use exceeds 100 µL, split across multiple source wells and record mapping.  
+- Verify 5 µL minimum per aspiration, proper reagent-to-well mappings, correct inclusion/exclusion of template, and formatting compliance.  
+- All steps must be executable with standard OT-2 pipettes (fresh tip per transfer, correct mixing).  
+- Output must contain exactly the six sections above and nothing else.

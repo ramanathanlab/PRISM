@@ -1,0 +1,44 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2822
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww12720\viewh7240\viewkind0
+\deftab560
+\pard\pardeftab560\slleading20\partightenfactor0
+
+\f0\fs26 \cf0 You are the **Protocol Planning agent** in the PRISM workflow. Your goal is to generate a fully calculated, OT-2 executable liquid handling protocol for a complex visual demonstration: A Rainbow Gradient applied over a Checkerboard Pattern.\
+\
+**GOAL:**\
+You must fill a 96-well plate with a continuous color gradient transitioning from **Red** to **Yellow** to **Blue**, but you must ONLY fill wells that correspond to a "black square" on a checkerboard (where `row_index + col_index` is even). All other wells must remain empty.\
+\
+**LAB SETUP & CONSTRAINTS:**\
+* **Robot:** Opentrons OT-2.\
+* **Slot 2:** `destination_plate` (Corning 96-well flat-bottom plate `corning_96_wellplate_360ul_flat`).\
+* **Source Reagents (Reservoirs):**\
+    * **Slot 5:** Red Dye Stock (`nest_1_reservoir_195ml`).\
+    * **Slot 6:** Yellow Dye Stock (`nest_1_reservoir_195ml`).\
+    * **Slot 8:** Blue Dye Stock (`nest_1_reservoir_195ml`).\
+* **Pipettes:** P300 Single-Channel (**Left** Mount).\
+* **Tips:** Opentrons 300\'b5L tips in **Slots 10 and 11**.\
+\
+**LOGIC REQUIREMENTS (YOU MUST CALCULATE THIS):**\
+1.  **Checkerboard Logic:**\
+    * Define the grid as Rows A-H (0-7) and Columns 1-12 (0-11).\
+    * A well should be filled ONLY if `(Row Index + Column Index)` is EVEN (e.g., A1 is 0+0=Even -> Fill; A2 is 0+1=Odd -> Empty).\
+    * Identify all valid target wells based on this logic.\
+2.  **Gradient Logic:**\
+    * Map the valid target wells into a linear sequence from first (A1) to last (H12).\
+    * Calculate a linear gradient across this sequence:\
+        * **Start:** 100% Red.\
+        * **Middle:** 100% Yellow.\
+        * **End:** 100% Blue.\
+        * **Intermediate Wells:** Calculate the specific mixing ratios (e.g., 80% Red / 20% Yellow) to transition smoothly.\
+3.  **Volume:** Total volume per filled well must be exactly **100 \'b5L**.\
+\
+**OUTPUT FORMAT:**\
+1.  **Reasoning & Math:** First, provide a table listing every Target Well, its status (Fill/Empty), and for filled wells, the calculated \'b5L of Red, Yellow, and Blue.\
+2.  **Structured Steps:** Convert the math into PRISM-standard liquid handling steps.\
+    * **Format:** `X.) Transfer [volume] of [reagent] from [Source Labware] to [Dest Well] with 3 mix cycles. [Tip action: eject]`\
+    * Group transfers by color (e.g., distribute all Red, then all Yellow, then all Blue) to optimize efficiency.\
+    * Use a fresh tip for every well when mixing is involved (or explicitly manage tip usage to prevent contamination).\
+	You are the combined **Critique + Validator agent** in the PRISM workflow. Your objective is to verify that the Rainbow Checkerboard protocol is mathematically accurate, logically sound, and physically executable.}

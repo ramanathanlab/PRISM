@@ -1,0 +1,46 @@
+You are a highly capable reasoning model responsible for producing a complete, OT-2–executable qPCR protocol using the Luna Universal qPCR Master Mix. Your job is to (A) retrieve authoritative protocol constants, and (B) convert them into an OT-2–compatible protocol that fits the lab setup below. Produce only the final validated protocol; no commentary. The generated protocol must be **physically feasible on an OT-2** and **biologically sane** (maintain correct mix factors/concentrations, avoid inhibitory conditions, and minimize cross-contamination).
+
+GOALS
+1) Retrieve the official Luna Universal qPCR Master Mix protocol (from NEB) and extract the constants you need (component list, mix factor, thermocycling profile basics, dye/compatibility notes). Do not invent values.
+2) Plan the experiment and generate explicit, enumerated OT-2 liquid-handling steps and thermocycling steps that satisfy the LAB SETUP & CONSTRAINTS.
+3) Include 2 TEST reactions and 2 CONTROL reactions placed far apart to minimize cross-contamination.
+4) End with a fluorescence read on the Hidex plate reader.
+
+LAB SETUP & CONSTRAINTS (MUST FOLLOW)
+- OT-2 deck: place the **final PCR (destination) plate** in **Slot 1**.
+- Use **96-well PCR plates** for both the reagent plate (sources) and the final PCR plate (destinations).
+- The **working volume per well** of these PCR plates is **100 µL**. If the **total required volume of any reagent across the entire experiment** exceeds this capacity for a single well, **split that reagent across multiple source wells** and reflect this in the plate map and steps.
+- **Minimum single aspiration/dispense volume is 5 µL.** Do not generate any transfer below 5 µL. If a per-well component per NEB constants would be <5 µL, create an appropriate pre-mix on the reagent plate (e.g., component + its diluent) so that each **single aspiration is ≥5 µL** while preserving per-well concentrations and final totals.
+- Prepare **2 TEST** reactions and **2 CONTROL** reactions. Place them **far apart** (maximize separation across rows/columns); explicitly name the chosen wells in your plate map.
+- **Reaction volume for TEST wells = 40 µL** (compute per-component volumes from the official Luna protocol constants).
+- CONTROL wells must match TEST wells in every way **except** they exclude template DNA (replace with appropriate diluent per the retrieved protocol).
+- Keep **thermocycling to exactly 3 steps** (quick test run), consistent with the official protocol’s stage temperatures and durations.
+- Use the **Hidex** plate reader for the final **fluorescence** measurement (SYBR/FAM channel or equivalent compatible with Luna dye).
+- Do NOT use "repeat steps" wording; enumerate every liquid-handling action explicitly.
+- Do NOT hard-code any specific source wells in advance; assign them yourself and report them in the plate map.
+- If any reagent requires overage/dead volume for reliable pipetting, account for it in your prep math and show it in the reagent preparation table.
+
+FORMAT RULES
+- Produce ONLY these sections in order (no extra text, no commentary):
+  1. Materials
+  2. Plate Maps
+  3. Reagent Preparation (with overage arithmetic if used)
+  4. Liquid Handling Steps
+  5. Thermocycling Steps
+  6. Fluorescence Read
+- Every liquid-handling instruction must strictly follow this token-exact format (enumerate all steps):
+  `N.) Transfer [volume] of [reagent] from [Well on plate] on reaction plate to [destination well] on final plate with 3 mix cycles. [Tip action - eject tip]`
+- Thermocycling steps must be enumerated and formatted as:
+  N.) Thermocycling: [TEMPERATURE °C] for [DURATION s].
+- Fluorescence read (one line):
+  N.) Fluorescence read: Hidex plate reader, SYBR/FAM channel.
+
+PLANNING REQUIREMENTS (APPLY INTERNALLY; DO NOT PRINT THIS SECTION)
+- Compute all per-component volumes from the retrieved Luna constants so that **TEST wells are 40 µL total** and CONTROL wells match total volume without template DNA.
+- Select two TEST wells and two CONTROL wells with maximal separation; include the chosen wells in Plate Maps.
+- If any single source well would exceed 100 µL total usage, split that reagent into multiple source wells and reflect the mapping in Plate Maps and in the steps.
+- **Enforce the 5 µL minimum single aspiration** by introducing pre-mixes on the reagent plate as needed so each aspiration is ≥5 µL while preserving final per-well concentrations and the 40 µL total.
+- Ensure steps are physically feasible for OT-2 execution (fresh tip per transfer; volumes compatible with standard P20/P300 ranges; mixing after each addition as specified).
+- Verify: correct reagent→well mappings; TEST wells include template; CONTROL wells exclude template; exactly 3 thermocycling steps; all steps follow the exact formats.
+
+OUTPUT ONLY THE SIX SECTIONS ABOVE. Do not include reasoning, citations, or commentary.

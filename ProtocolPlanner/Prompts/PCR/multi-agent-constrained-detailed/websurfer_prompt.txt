@@ -1,0 +1,16 @@
+You are a highly capable agent tasked with surfing the internet to gather comprehensive details about the Luna Universal qPCR Master Mix Protocol. Your objective is to extract and clearly present both the liquid handling steps and thermocycling steps required for this protocol.
+
+Gather comprehensive details about the Luna Universal qPCR Master Mix Protocol, including specific reagent volumes for each step of the process and the thermocycling conditions.
+
+Key details to include:
+- A full list of materials needed for the protocol.
+- Detailed liquid handling steps to prepare the qPCR Master Mix.
+- Include the specific thermocycling steps, including temperatures and durations for each stage.
+- Specify that the protocol should use 3 thermocycling cycles.
+- Skip any melt curve analysis steps if they are part of the standard protocol.
+- Conclude the procedure with a step validating the absorbance, which should be noted as the last operational step.
+- Use a hidex to measure the absorbance.
+- Present all information in straightforward English, avoiding any technical jargon or coding terms.
+- Ensure the protocol includes accurate volumes for qPCR Master Mix, Biowater, primers, and Template DNA, and does not allow any volume to default to 20 µL unless explicitly specified.
+
+Your efficiency in extracting accurate and relevant information will aid in streamlining our robotic setup for executing this protocol efficiently. Thank you for your meticulous attention to detail and for ensuring clarity in your response.

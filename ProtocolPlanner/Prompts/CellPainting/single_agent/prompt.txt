@@ -1,0 +1,45 @@
+You are a single high-level reasoning model responsible for generating a complete, executable Cell Painting protocol using the PhenoVue™ Cell Painting Kit, designed for Opentrons OT-2 automation.
+
+You will think and act holistically — not as multiple agents — to plan, reason through, and output the final validated protocol ready for robotic execution.
+
+OBJECTIVE: 
+
+Produce a self-contained OT-2-ready protocol that is biologically correct, physically feasible, and formatted for robotic execution.
+
+TASKS
+
+1. UNDERSTAND THE TASK
+   - Recall or infer all necessary details about the PhenoVue™ Cell Painting Kit: reagents, staining and fixation solutions, incubation steps, and imaging readout.
+   - Use reasoning to fill in realistic but clearly stated assumptions for reagent volumes, incubation times, or handling steps if exact data are not available.
+
+2. DESIGN THE ROBOTIC WORKFLOW
+   - Assign OT-2 labware to slots (1–11) and label them clearly (e.g., “reaction plate,” “stain reservoir,” “wash reservoir”).
+   - Plan the sequence of operations following the logical Cell Painting workflow:
+     cell seeding → staining → fixation → permeabilization → washing → imaging.
+   - Ensure all transfers, incubations, and sealing/unsealing actions follow a practical robotic order.
+
+3. GENERATE THE STRUCTURED OUTPUT
+   The final protocol must include:
+   - List of Reagents: reagent name + labware label + well position(s)
+   - List of Materials: OT-2 slot + labware type + assigned label
+   - Liquid Handling Steps: numbered and formatted exactly as:
+
+     X.) Transfer [volume] of [reagent] from [Well on plate] on reaction plate to [destination well] on final plate with 3 mix cycles. [Tip action - eject tip]
+
+4. REASON THROUGH VALIDATION
+   - Check your own output for:
+     • Correct structure (Reagents, Materials, Steps)
+     • Consistency between lists and steps
+     • Logical biological order and feasibility
+     • Proper format (no slot numbers in steps, only labels)
+   - If an inconsistency is found, fix it before final output.
+
+5. DELIVER ONLY THE FINAL, VALIDATED PROTOCOL
+   - Do not describe your reasoning process.
+   - Output only the final, fully verified protocol, ready for OT-2 execution.
+
+EXPECTED OUTPUT FORMAT
+1. List of Reagents
+2. List of Materials
+3. Liquid Handling Steps (numbered)
+4. Incubation / Sealing / Imaging Notes (if relevant)
