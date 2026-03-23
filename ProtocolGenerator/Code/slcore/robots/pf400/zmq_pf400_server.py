@@ -1,0 +1,419 @@
+import threading
+
+import numpy as np
+from isaacsim.core.utils.stage import get_current_stage
+from isaacsim.core.utils.types import ArticulationAction
+from pxr import Gf
+
+from slcore.common import utils
+from slcore.motion import IKError, MotionConfig, MotionDispatcher
+from slcore.motion.approaches import DifferentialIKApproach
+from slcore.robots.common.zmq_robot_server import ZMQ_Robot_Server
+from slcore.robots.common.config import (
+    CUSTOM_ASSETS_ROOT_PATH,
+    DEFAULT_PHYSICS_CONFIG,
+    DifferentialIKConfig,
+)
+from slcore.robots.common.zmq_server_mixins import RaycastMixin
+from slcore.robots.common.isaaclab_articulation import create_articulation_from_prim
+
+
+class ZMQ_PF400_Server(RaycastMixin, ZMQ_Robot_Server):
+    """Handles ZMQ communication for PF400 robot with integrated control.
+
+    Uses the motion architecture with DifferentialIKApproach for inverse
+    kinematics. The MotionDispatcher handles approach selection and validation.
+    """
+
+    def __init__(self, simulation_app, robot, robot_prim_path, robot_name: str, env_id: int):
+        super().__init__(simulation_app, robot, robot_prim_path, robot_name, env_id)
+
+        # PF400-specific gripper state
+        self._grab_joint = None
+        self._gripper_done = threading.Event()
+        self._gripper_result: dict = None
+
+        # IK solution preference (set per goto_pose call)
+        self.solution_preference = "closest_to_current"
+
+        # PF400-specific raycast configuration
+        self.raycast_direction = Gf.Vec3d(0, 0, -1)  # Downward for PF400
+        self.raycast_distance = DEFAULT_PHYSICS_CONFIG.raycast_distance
+
+        # Motion components (lazily initialized)
+        self.motion_config: MotionConfig = None
+        self.motion_dispatcher: MotionDispatcher = None
+        self.diff_ik_config: DifferentialIKConfig = None
+        self.isaac_lab_articulation = None
+        self._motion_initialized = False
+
+    def handle_command(self, request: dict) -> dict:
+        """Handle incoming ZMQ command"""
+        action = request.get("action", "")
+
+        if action == "move_joints":
+            joint_positions = request.get("joint_positions", [])
+            if not joint_positions:
+                joint_positions = request.get("joint_angles", [])  # Support both parameter names
+            expected_joints = len(self.robot.get_joint_positions())
+
+            if len(joint_positions) != expected_joints:
+                return self.create_error_response(f"Expected {expected_joints} joint positions, got {len(joint_positions)}")
+
+            self.current_action = "move_joints"
+            self.target_joints = np.array(joint_positions)
+            return self.create_success_response("command queued", joint_positions=joint_positions)
+
+        elif action == "get_joints":
+            joint_positions = self.robot.get_joint_positions()
+            return self.create_success_response("joints retrieved", joint_positions=joint_positions.tolist())
+
+        elif action == "get_status":
+            joint_positions = self.robot.get_joint_positions()
+            is_moving = self.current_action is not None
+            motion_complete = self.current_action is None
+            status = {
+                "robot_name": self.robot_name,
+                "joint_positions": joint_positions.tolist(),
+                "is_paused": self.is_paused,
+                "has_attached_object": bool(self._grab_joint),
+                "is_moving": is_moving,
+                "motion_complete": motion_complete,
+                "collision_detected": self.collision_detected
+            }
+            return self.create_success_response("status retrieved", data=status)
+
+        elif action == "gripper_open":
+            self._gripper_done.clear()
+            self._gripper_result = None
+            self.current_action = "gripper_open"
+            self._gripper_done.wait(timeout=5.0)
+            return self._gripper_result or self.create_error_response("Gripper open timed out")
+
+        elif action == "gripper_close":
+            self._gripper_done.clear()
+            self._gripper_result = None
+            self.current_action = "gripper_close"
+            self._gripper_done.wait(timeout=5.0)
+            return self._gripper_result or self.create_error_response("Gripper close timed out")
+
+        elif action == "goto_pose":
+            position = request.get("position", [])
+            orientation = request.get("orientation", [])
+            solution_preference = request.get("solution_preference", "closest_to_current")
+            approach = request.get("approach")  # None means use default
+
+            if len(position) != 3 or len(orientation) != 4:
+                return self.create_error_response("goto_pose requires position [x,y,z] and orientation [w,x,y,z]")
+
+            if solution_preference not in ("closest_to_current", "closest_to_home"):
+                return self.create_error_response("solution_preference must be 'closest_to_current' or 'closest_to_home'")
+
+            self.current_action = "goto_pose"
+            self.target_pose = (np.array(position), np.array(orientation))
+            self.solution_preference = solution_preference
+            self.requested_approach = approach
+            return self.create_success_response(
+                "goto_pose queued",
+                position=position,
+                orientation=orientation,
+                solution_preference=solution_preference,
+                approach=approach,
+            )
+
+        elif action == "goto_prim":
+            prim_name = request.get("prim_name", "")
+            solution_preference = request.get("solution_preference", "closest_to_current")
+            approach = request.get("approach")  # None means use default
+
+            if not prim_name:
+                return self.create_error_response("goto_prim requires prim_name parameter")
+
+            if solution_preference not in ("closest_to_current", "closest_to_home"):
+                return self.create_error_response("solution_preference must be 'closest_to_current' or 'closest_to_home'")
+
+            # Get prim from stage
+            stage = get_current_stage()
+            prim = stage.GetPrimAtPath(prim_name)
+
+            if not prim or not prim.IsValid():
+                return self.create_error_response(f"Prim not found: {prim_name}")
+
+            # Get prim world position and orientation
+            position, orientation = utils.get_xform_world_pose(prim)
+
+            # Queue goto_pose with prim's pose
+            self.current_action = "goto_pose"
+            self.target_pose = (position, orientation)
+            self.solution_preference = solution_preference
+            self.requested_approach = approach
+            return self.create_success_response(
+                "goto_prim queued",
+                prim_name=prim_name,
+                position=position.tolist(),
+                orientation=orientation.tolist(),
+                solution_preference=solution_preference,
+                approach=approach,
+            )
+
+        elif action == "get_ee_pose":
+            # Get end effector (pointer) world position and orientation
+            stage = get_current_stage()
+            end_effector_prim_path = f"{self.robot_prim_path}/pointer"
+            end_effector_prim = stage.GetPrimAtPath(end_effector_prim_path)
+
+            if not end_effector_prim or not end_effector_prim.IsValid():
+                return self.create_error_response(f"End effector not found at: {end_effector_prim_path}")
+
+            position, orientation = utils.get_xform_world_pose(end_effector_prim)
+            return self.create_success_response("ee_pose retrieved", data={
+                "position": position.tolist(),
+                "orientation": orientation.tolist(),
+            })
+
+        else:
+            return self.create_error_response(f"Unknown action: {action}")
+
+    # _get_end_effector_raycast_info is inherited from RaycastMixin
+
+    def _finish_gripper(self, result: dict):
+        """Store gripper result and signal the waiting ZMQ thread."""
+        self.current_action = None
+        self._gripper_result = result
+        self._gripper_done.set()
+
+    def execute_gripper_open(self, end_effector_name: str = 'pointer'):
+        """Execute gripper opening on the main thread, signal ZMQ thread when done."""
+        if not self._grab_joint:
+            print(f"Robot {self.robot_name} opened gripper (no object to detach)")
+            self._finish_gripper(self.create_success_response("gripper opened (nothing held)"))
+            return
+
+        success = self.detach_object(self._grab_joint)
+        if success:
+            self._grab_joint = None
+            print(f"Robot {self.robot_name} opened gripper (detached object)")
+            self._finish_gripper(self.create_success_response("gripper opened (detached object)"))
+        else:
+            print(f"Robot {self.robot_name} failed to open gripper")
+            self._finish_gripper(self.create_error_response("Failed to detach object"))
+
+    def execute_gripper_close(self, end_effector_name: str = 'pointer'):
+        """Execute gripper closing on the main thread, signal ZMQ thread when done."""
+        if self._grab_joint:
+            print(f"Robot {self.robot_name} already holding object")
+            self._finish_gripper(self.create_success_response("gripper already holding object"))
+            return
+
+        # Get raycast info using helper method
+        world_position, world_direction = self._get_end_effector_raycast_info(end_effector_name)
+
+        # Perform raycast
+        hit_prim = self.raycast(world_position, world_direction, self.raycast_distance, self.robot_prim_path)
+        if hit_prim:
+            # [HACK] Check if the hit object is a microplate
+            hit_path = hit_prim.GetPath().pathString
+            if "microplate" not in hit_path:
+                print(f"Robot {self.robot_name} ignored grasp target (not a microplate): {hit_path}")
+                self._finish_gripper(self.create_success_response(
+                    "gripper closed (ignored non-microplate)",
+                    hit_path=hit_path,
+                ))
+                return
+
+            try:
+                joint_path = self.attach_object(hit_prim.GetPath().pathString, end_effector_name)
+                self._grab_joint = joint_path
+                print(f"Robot {self.robot_name} closed gripper (attached object)")
+                self._finish_gripper(self.create_success_response(
+                    "gripper closed (attached object)",
+                    attached=hit_path,
+                ))
+            except Exception as e:
+                print(f"Robot {self.robot_name} failed to close gripper: {str(e)}")
+                self._finish_gripper(self.create_error_response(f"Failed to attach object: {str(e)}"))
+        else:
+            print(f"Robot {self.robot_name} closed gripper (no object detected)")
+            self._finish_gripper(self.create_success_response("gripper closed (no object detected)"))
+
+    def on_collision(self, actor0, actor1):
+        """Handle collision detection - only care about collisions while moving"""
+
+        # Only care about collisions while moving
+        if self.current_action is None:
+            return
+
+        # Use environment-specific microplate path for parallel environments
+        microplate_path = f"/World/env_{self.env_id}/microplate"
+        involves_microplate = microplate_path in actor0 or microplate_path in actor1
+        involves_robot = actor0.startswith(self.robot_prim_path) or actor1.startswith(self.robot_prim_path)
+        holding_microplate = self._grab_joint is not None
+
+        # Case 1: Robot hit something that's not the microplate
+        if involves_robot and not involves_microplate:
+            pass  # Care about this
+
+        # Case 2: Robot touching microplate it's holding
+        elif involves_robot and involves_microplate and holding_microplate:
+            return  # Ignore
+
+        # Case 3: Microplate we're holding hit something (not the robot)
+        elif involves_microplate and not involves_robot and holding_microplate:
+            pass  # Care about this
+
+        # Case 4: Any other collision (including microplate when not holding)
+        else:
+            return  # Ignore
+
+        # Handle the collision
+        self.collision_detected = True
+        self.collision_actors = f"{actor0} <-> {actor1}"
+        print(f"Robot {self.robot_name} collision detected: {self.collision_actors}")
+
+        self.halt_motion()
+        self.current_action = None
+
+    def update(self):
+        """Called every simulation frame to execute robot actions"""
+        if self.is_paused:
+            return
+
+        if self.current_action is None:
+            return
+
+        if self.current_action == "move_joints":
+            self.execute_move_joints()
+        elif self.current_action == "goto_pose":
+            self.execute_goto_pose()
+        elif self.current_action == "gripper_open":
+            self.execute_gripper_open()
+        elif self.current_action == "gripper_close":
+            self.execute_gripper_close()
+
+    def _ensure_motion_initialized(self):
+        """Lazily initialize motion dispatcher on first use.
+
+        Isaac Lab Articulation requires physics simulation to be running,
+        so we defer initialization until the first goto_pose call.
+        """
+        if self._motion_initialized:
+            return
+
+        # Load motion configuration from YAML
+        config_dir = CUSTOM_ASSETS_ROOT_PATH / "robots/Brooks/PF400/isaacsim"
+        motion_config_path = config_dir / "motion_config.yaml"
+        self.motion_config = MotionConfig.from_yaml(motion_config_path)
+
+        # Create dispatcher
+        self.motion_dispatcher = MotionDispatcher(self.motion_config)
+
+        # Load differential IK config for the approach
+        diff_ik_config_path = config_dir / "differential_ik_config.yaml"
+        self.diff_ik_config = DifferentialIKConfig.from_yaml(diff_ik_config_path)
+
+        # Create Isaac Lab Articulation wrapper (points to same USD prim as self.robot)
+        self.isaac_lab_articulation = create_articulation_from_prim(
+            prim_path=self.robot_prim_path,
+            device="cuda:0",
+        )
+
+        # Create and register differential IK approach
+        diff_ik_approach = DifferentialIKApproach(
+            articulation=self.isaac_lab_articulation,
+            config=self.diff_ik_config,
+            joint_names=self.isaac_lab_articulation.data.joint_names,
+            device="cuda:0",
+        )
+        self.motion_dispatcher.register_approach("differential_ik", diff_ik_approach)
+
+        self._motion_initialized = True
+        print(f"Motion dispatcher initialized for {self.robot_name}")
+
+    def execute_goto_pose(self):
+        """Execute pose-based movement using the motion dispatcher.
+
+        Computes IK once on first call, then drives to the computed joint
+        positions on subsequent frames (same as move_joints).
+        """
+        # If we already have target joints (IK computed), just drive to them
+        if self.target_joints is not None:
+            self.execute_move_joints()
+            return
+
+        # Need to compute IK - require target pose
+        if self.target_pose is None:
+            self.current_action = None
+            raise RuntimeError(
+                f"Robot {self.robot_name}: Cannot execute goto_pose - missing target pose"
+            )
+
+        # Compute IK once and convert to move_joints action
+        # Initialize motion dispatcher on first use
+        self._ensure_motion_initialized()
+
+        target_position, target_orientation = self.target_pose
+
+        # Update robot base pose for the differential IK approach
+        robot_pos, robot_rot = utils.get_xform_world_pose(self.robot_prim)
+        diff_ik_approach = self.motion_dispatcher.get_approach("differential_ik")
+        if diff_ik_approach:
+            diff_ik_approach.set_robot_base_pose(robot_pos, robot_rot)
+
+        # Get approach name (explicit or None for default)
+        approach = getattr(self, 'requested_approach', None)
+
+        try:
+            # Compute motion using dispatcher
+            result = self.motion_dispatcher.compute_motion(
+                target_position=target_position,
+                target_orientation=target_orientation,
+                approach=approach,
+                solution_preference=self.solution_preference,
+            )
+
+            # Cache the computed joint positions and clear pose target
+            self.target_joints = result.joint_positions
+            self.target_pose = None
+            self.requested_approach = None
+            print(
+                f"Robot {self.robot_name} IK computed target joints: "
+                f"{result.joint_positions.tolist()}"
+            )
+
+            # Start driving to the computed joint positions
+            self.execute_move_joints()
+
+        except IKError as e:
+            self.current_action = None
+            self.target_pose = None
+            self.requested_approach = None
+            raise RuntimeError(
+                f"Robot {self.robot_name}: {e}"
+            ) from e
+
+    def _close_to_target_joints(self, target_joints: np.ndarray) -> bool:
+        """Check if robot joints are close to target positions.
+
+        Uses configurable thresholds from motion_config.yaml.
+
+        Args:
+            target_joints: Target joint positions
+
+        Returns:
+            True if robot is close to target and nearly stopped
+        """
+        current_joints = np.array(self.robot.get_joint_positions())
+        velocities = np.array(self.robot.get_joint_velocities())
+
+        joint_diff = np.sum(np.abs(current_joints - target_joints))
+        vel_sum = np.sum(np.abs(velocities))
+
+        # Get thresholds from motion config
+        thresholds = self.motion_config.execution.convergence_threshold
+        position_threshold = thresholds.get("position", 0.003)
+        velocity_threshold = thresholds.get("velocity", 0.008)
+
+        return (
+            joint_diff < position_threshold
+            and vel_sum < velocity_threshold
+        )

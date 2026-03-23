@@ -1,0 +1,28 @@
+api_version: 1.0
+collision_spheres:
+- carriage: null
+- column: null
+- finger_left: null
+- finger_right: null
+- hand: null
+- link_inner: null
+- link_outer: null
+- rail: null
+- rail_base: null
+cspace:
+- J1
+- J4
+- J2
+- J3
+- J6
+- J5_mirror
+- J5
+cspace_to_urdf_rules: null
+default_q:
+- 0.0
+- 0.0
+- 0.0
+- 0.0
+- 0.0
+- 0.0
+- 0.0

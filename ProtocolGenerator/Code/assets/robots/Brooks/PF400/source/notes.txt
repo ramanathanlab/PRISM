@@ -1,0 +1,2 @@
+Each gripper finger has .03731 meter travel
+Tower moves 3.5+ inches from the end on either side

@@ -1,0 +1,21 @@
+api_version: 1.0
+collision_spheres:
+- frame: null
+- pipette_casing: null
+- pipette_left: null
+- pipette_rail: null
+- pipette_right: null
+- pointer: null
+cspace:
+- pipette_left_joint
+- pipette_rail_joint
+- pipette_right_joint
+- pipette_casing_joint
+- pointer_joint
+cspace_to_urdf_rules: null
+default_q:
+- 0.0
+- 0.0
+- 0.0
+- 0.0
+- 0.0

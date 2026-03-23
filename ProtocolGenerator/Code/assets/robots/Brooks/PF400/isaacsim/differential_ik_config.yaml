@@ -1,0 +1,32 @@
+# Differential IK Configuration for PF400
+#
+# Used by DifferentialIKSolver with Isaac Lab's DifferentialIKController.
+# See slcore/robots/common/differential_ik_solver.py for implementation.
+
+# IK solver method
+# Options: "pinv" (pseudo-inverse), "svd", "trans", "dls" (damped least-squares)
+ik_method: "dls"
+
+# IK solver parameters (method-specific)
+ik_params:
+  # Damping factor for DLS method
+  # Higher = more stable near singularities, lower = faster convergence
+  lambda_val: 0.05
+
+# Convergence tolerances for IK solution validation
+tolerances:
+  position: 0.001  # Position tolerance in meters
+  orientation: 0.01  # Orientation tolerance in radians
+
+# Motion completion thresholds
+motion_complete:
+  joint_diff_threshold: 0.003  # Max joint position error for completion (radians)
+  velocity_threshold: 0.008  # Max joint velocity for completion (rad/s)
+
+# Home pose configuration (joint angles in radians)
+# PF400 joint order: J1, J4, J2, J3, J6, J5_mirror, J5
+home_pose: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+# End effector configuration
+end_effector:
+  body_name: "pointer"

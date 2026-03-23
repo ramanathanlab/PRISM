@@ -1,0 +1,29 @@
+# Motion Configuration for PF400
+#
+# Defines available motion approaches and execution settings.
+# Used by MotionDispatcher to route motion commands.
+# See slcore/motion/ for implementation.
+
+motion:
+  # Default approach when not specified in command
+  default_approach: "differential_ik"
+
+  # Available approaches and their configuration
+  approaches:
+    differential_ik:
+      enabled: true
+      # Config loaded from differential_ik_config.yaml in same directory
+
+  # Execution settings
+  execution:
+    # Default execution mode
+    # Options: "teleport" (instant), "pd_follow" (physics-based)
+    default_mode: "pd_follow"
+
+    # Motion completion thresholds
+    convergence_threshold:
+      position: 0.003  # radians
+      velocity: 0.008  # rad/s
+
+    # Trajectory waypoint stepping rate (for future trajectory support)
+    trajectory_timestep: 0.01  # 100Hz

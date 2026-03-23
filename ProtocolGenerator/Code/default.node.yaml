@@ -1,0 +1,7 @@
+node_name: default.node
+node_id: 01KME3N3VJ58511V535DKKPKZV
+node_description: null
+node_type: device
+module_name: sim_ot2_node
+module_version: 0.0.1
+capabilities: null

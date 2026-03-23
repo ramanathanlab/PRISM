@@ -1,0 +1,90 @@
+body_collision_controllers:
+- name: pointer
+  radius: 0.01
+body_cylinders:
+- name: rail_base
+  pt1:
+  - 0
+  - 0
+  - 0.0
+  pt2:
+  - 0
+  - 0
+  - 0.0
+  radius: 0.01
+canonical_resolve:
+  max_acceleration_norm: 50.0
+  projection_tolerance: 0.01
+  verbose: false
+joint_limit_buffers:
+- 0.001
+- 0.001
+- 0.001
+- 0.001
+- 0.001
+- 0.001
+- 0.001
+rmp_params:
+  axis_target_rmp:
+    accel_d_gain: 60.0
+    accel_p_gain: 210.0
+    accept_user_weights: false
+    metric_scalar: 10
+    proximity_metric_boost_length_scale: 0.08
+    proximity_metric_boost_scalar: 3000.0
+    xi_estimator_gate_std_dev: 20000.0
+  collision_rmp:
+    damping_gain: 50.0
+    damping_robustness_eps: 1e-2
+    damping_std_dev: 0.04
+    damping_velocity_gate_length_scale: 0.01
+    metric_exploder_eps: 0.001
+    metric_exploder_std_dev: 0.02
+    metric_modulation_radius: 0.5
+    metric_scalar: 10000.0
+    repulsion_gain: 800.0
+    repulsion_std_dev: 0.01
+  cspace_affine_rmp:
+    final_handover_time_std_dev: 0.25
+    weight: 2000.0
+  cspace_target_rmp:
+    damping_gain: 50.0
+    inertia: 1.0
+    metric_scalar: 50.0
+    position_gain: 100.0
+    robust_position_term_thresh: 0.5
+  cspace_trajectory_rmp:
+    d_gain: 10.0
+    ff_gain: 0.25
+    p_gain: 100.0
+    weight: 50.0
+  damping_rmp:
+    accel_d_gain: 30.0
+    inertia: 100.0
+    metric_scalar: 50.0
+  joint_limit_rmp:
+    accel_damper_gain: 200.0
+    accel_potential_exploder_eps: 1e-2
+    accel_potential_exploder_length_scale: 0.1
+    accel_potential_gain: 1.0
+    metric_exploder_eps: 1e-3
+    metric_length_scale: 0.01
+    metric_scalar: 1000.0
+    metric_velocity_gate_length_scale: 0.01
+  joint_velocity_cap_rmp:
+    damping_gain: 1000.0
+    max_velocity: 1.0
+    metric_weight: 100.0
+    velocity_damping_region: 0.3
+  target_rmp:
+    accel_d_gain: 85.0
+    accel_norm_eps: 0.075
+    accel_p_gain: 30.0
+    accept_user_weights: false
+    max_metric_scalar: 10000
+    metric_alpha_length_scale: 0.05
+    min_metric_alpha: 0.01
+    min_metric_scalar: 2500
+    proximity_metric_boost_length_scale: 0.02
+    proximity_metric_boost_scalar: 20.0
+    xi_estimator_gate_std_dev: 20000.0

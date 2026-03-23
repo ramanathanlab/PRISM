@@ -1,0 +1,71 @@
+<robot name="pf400">
+  <link name="carriage" />
+  <link name="column" />
+  <link name="finger_left" />
+  <link name="finger_right" />
+  <link name="hand" />
+  <link name="link_inner" />
+  <link name="link_outer" />
+  <link name="pointer" />
+  <link name="rail" />
+  <link name="rail_base" />
+  <joint name="J1" type="prismatic">
+    <parent link="column" />
+    <child link="carriage" />
+    <origin rpy="0.0 -0.0 0.0" xyz="0.0 0.0 -0.015260014683008194" />
+    <axis xyz="0 0 1" />
+    <limit effort="100.0" lower="0.0" upper="10.0" velocity="0.20000000298023224" />
+  </joint>
+  <joint name="J4" type="revolute">
+    <parent link="link_outer" />
+    <child link="hand" />
+    <origin rpy="0.0 -0.0 0.0" xyz="-0.2889997959136963 -2.7939677238464355e-08 -0.039174988865852356" />
+    <axis xyz="0 0 1" />
+    <limit effort="100.0" lower="-5.0" upper="5.0" velocity="10000" />
+  </joint>
+  <joint name="J2" type="revolute">
+    <parent link="carriage" />
+    <child link="link_inner" />
+    <origin rpy="0.0 -0.0 0.0" xyz="0.10265089571475983 0.00020003877580165863 0.3110619783401489" />
+    <axis xyz="0 0 1" />
+    <limit effort="100.0" lower="-5.0" upper="5.0" velocity="17453.292519943294" />
+  </joint>
+  <joint name="J3" type="revolute">
+    <parent link="link_inner" />
+    <child link="link_outer" />
+    <origin rpy="0.0 -0.0 0.0" xyz="0.3020002245903015 0.0 -0.0646749883890152" />
+    <axis xyz="0 0 1" />
+    <limit effort="100.0" lower="-5.0" upper="5.0" velocity="17453.292519943294" />
+  </joint>
+  <joint name="J6" type="prismatic">
+    <parent link="rail_base" />
+    <child link="rail" />
+    <origin rpy="0.0 -0.0 0.0" xyz="0.0 0.0 0.0" />
+    <axis xyz="1 0 0" />
+    <limit effort="100.0" lower="-10.0" upper="10.0" velocity="0.5" />
+  </joint>
+  <joint name="J5_mirror" type="prismatic">
+    <parent link="hand" />
+    <child link="finger_left" />
+    <origin rpy="0.0 -0.0 0.0" xyz="0.0 -0.001953640952706337 0.0" />
+    <axis xyz="0 1 0" />
+    <limit effort="100.0" lower="-0.03700000047683716" upper="0.0" velocity="10000" />
+  </joint>
+  <joint name="FixedJoint1" type="fixed">
+    <parent link="rail" />
+    <child link="column" />
+    <origin rpy="0.0 -0.0 0.0" xyz="0.0 0.0 1.4901161193847656e-08" />
+  </joint>
+  <joint name="J5" type="prismatic">
+    <parent link="hand" />
+    <child link="finger_right" />
+    <origin rpy="0.0 -0.0 0.0" xyz="0.0 0.001953640952706337 0.0" />
+    <axis xyz="0 1 0" />
+    <limit effort="100.0" lower="0.0" upper="0.03700000047683716" velocity="10000" />
+  </joint>
+  <joint name="pointer_joint" type="fixed">
+    <parent link="hand" />
+    <child link="pointer" />
+    <origin rpy="0.0 -0.0 0.0" xyz="0.14696623384952545 -0.00020001083612442017 -0.05455034226179123" />
+  </joint>
+</robot>

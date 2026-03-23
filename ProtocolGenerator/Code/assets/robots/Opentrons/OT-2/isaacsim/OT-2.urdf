@@ -1,0 +1,43 @@
+<robot name="ot2">
+  <link name="frame" />
+  <link name="pipette_casing" />
+  <link name="pipette_left" />
+  <link name="pipette_rail" />
+  <link name="pipette_right" />
+  <link name="pointer" />
+  <joint name="pipette_left_joint" type="prismatic">
+    <parent link="pipette_casing" />
+    <child link="pipette_left" />
+    <origin rpy="0.0 -0.0 0.0" xyz="-0.016358286142349243 0.08388692140579224 -0.10374274849891663" />
+    <axis xyz="0 0 1" />
+    <limit effort="100.0" lower="-0.15860000252723694" upper="0.0" velocity="10000" />
+  </joint>
+  <joint name="pipette_rail_joint" type="prismatic">
+    <parent link="frame" />
+    <child link="pipette_rail" />
+    <origin rpy="0.0 -0.0 0.0" xyz="-8.996327949262195e-08 -0.1956709772348404 0.528290867805481" />
+    <axis xyz="0 1 0" />
+    <limit effort="100.0" lower="0.0" upper="0.34790000319480896" velocity="10000" />
+  </joint>
+  <joint name="pipette_right_joint" type="prismatic">
+    <parent link="pipette_casing" />
+    <child link="pipette_right" />
+    <origin rpy="0.0 -0.0 0.0" xyz="0.01635715365409851 0.0838838517665863 -0.10373720526695251" />
+    <axis xyz="0 0 1" />
+    <limit effort="100.0" lower="-0.15860000252723694" upper="0.0" velocity="10000" />
+  </joint>
+  <joint name="pipette_casing_joint" type="prismatic">
+    <parent link="pipette_rail" />
+    <child link="pipette_casing" />
+    <origin rpy="0.0 -0.0 0.0" xyz="-0.20969995856285095 -0.02204437553882599 0.000991225242614746" />
+    <axis xyz="1 0 0" />
+    <limit effort="100.0" lower="0.0" upper="0.41940000653266907" velocity="10000" />
+  </joint>
+  <joint name="pointer_joint" type="revolute">
+    <parent link="pipette_right" />
+    <child link="pointer" />
+    <origin rpy="0.0 -0.0 0.0" xyz="2.8943156848981744e-06 1.501007091064821e-06 -0.1376277655363083" />
+    <axis xyz="0 0 1" />
+    <limit effort="100.0" velocity="10000" />
+  </joint>
+</robot>

@@ -1,0 +1,11 @@
+# MADSci dependencies
+opentrons==8.5.1
+git+https://github.com/AD-SDL/ot2_module.git@552ad11cbe8fc517be51b070eed6f384fd4fdadf
+pandas
+git+https://github.com/AD-SDL/pf400_module.git@b3e1f8bfc598e4ce66d77af3013e29b2884a1f04
+madsci-client==0.6.0
+madsci-common==0.6.0
+madsci-node-module==0.6.0
+
+# Shared
+zmq

@@ -1,0 +1,7 @@
+# Override madsci package constraints to allow 0.6.0
+madsci-common>=0.5.0
+madsci-client>=0.5.0
+madsci-node-module>=0.5.0
+
+# Override numpy constraint (opentrons requires <2, ur-module requires >=2)
+numpy>=2.0.0

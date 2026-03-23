@@ -1,15 +1,19 @@
-name: PCR Amplification Workflow
+name: PCR Amplification and Analysis
 metadata:
   author: PRISM
-  info: Automated PCR workflow with OT-2 liquid handling, sealing, thermocycling, peeling, and Hidex assay
+  info: Automated qPCR workflow with liquid handling, sealing, thermocycling, peeling, and plate reading
   version: '1.0'
+parameters:
+- key: protocol_script
+  parameter_type: file_input
+  description: Protocol file
 steps:
-- name: Execute OT-2 liquid handling protocol
+- name: Run PCR master mix and sample preparation protocol
   node: ot2
   action: run_protocol
   files:
-    protocol: /home/rmbutler/simlab/projects/prism/ot2.py
-- name: Transfer plate from OT-2 (wide) to exchange (wide)
+    protocol: protocol_script
+- name: Transfer plate from OT-2 to exchange station
   node: pf400
   action: transfer
   args:
@@ -20,7 +24,7 @@ steps:
     source_approach: safe_path_ot2bioalpha
     target: exchange_deck_high_wide
     target_approach: safe_path_exchange
-- name: Transfer plate from exchange (narrow) to sealer (narrow)
+- name: Transfer plate from exchange to sealer
   node: pf400
   action: transfer
   args:
@@ -31,15 +35,15 @@ steps:
     source_approach: safe_path_exchange
     target: sealer_nest
     target_approach: safe_path_sealer
-- name: Seal the reaction plate
+- name: Seal the reaction plate for thermocycling
   node: sealer
   action: seal
   args: {}
-- name: Open thermocycler lid
+- name: Open thermocycler lid for plate loading
   node: thermocycler
   action: open
   args: {}
-- name: Transfer sealed plate from sealer (narrow) to exchange (narrow)
+- name: Transfer plate from sealer to exchange station
   node: pf400
   action: transfer
   args:
@@ -50,7 +54,7 @@ steps:
     source_approach: safe_path_sealer
     target: exchange_deck_high_narrow
     target_approach: safe_path_exchange
-- name: Transfer sealed plate from exchange (wide) to thermocycler (wide)
+- name: Transfer plate from exchange to thermocycler
   node: pf400
   action: transfer
   args:
@@ -65,16 +69,16 @@ steps:
   node: thermocycler
   action: close
   args: {}
-- name: Run thermocycling program
+- name: Run thermocycling program 5
   node: thermocycler
   action: run_program
   args:
     program_number: 5
-- name: Open thermocycler lid to unload
+- name: Open thermocycler lid after cycling
   node: thermocycler
   action: open
   args: {}
-- name: Transfer plate from thermocycler (wide) to exchange (wide)
+- name: Transfer plate from thermocycler to exchange station
   node: pf400
   action: transfer
   args:
@@ -85,7 +89,7 @@ steps:
     source_approach: safe_path_biometra3
     target: exchange_deck_high_wide
     target_approach: safe_path_exchange
-- name: Transfer plate from exchange (narrow) to peeler (narrow)
+- name: Transfer plate from exchange to peeler
   node: pf400
   action: transfer
   args:
@@ -96,7 +100,7 @@ steps:
     source_approach: safe_path_exchange
     target: peeler_nest
     target_approach: safe_path_peeler
-- name: Peel the plate seal
+- name: Peel seal from reaction plate
   node: peeler
   action: peel
   args: {}
@@ -104,7 +108,7 @@ steps:
   node: hidex
   action: open
   args: {}
-- name: Transfer plate from peeler (narrow) to Hidex (narrow)
+- name: Transfer plate from peeler to Hidex plate reader
   node: pf400
   action: transfer
   args:
@@ -115,16 +119,16 @@ steps:
     source_approach: safe_path_peeler
     target: hidex_geraldine_high_nest
     target_approach: safe_path_hidex
-- name: Close Hidex lid
+- name: Close Hidex plate reader lid
   node: hidex
   action: close
   args: {}
-- name: Run assay PCR_Final_Results
+- name: Run PCR final results absorbance assay
   node: hidex
   action: run_assay
   args:
     assay_name: PCR_Final_Results
-- name: Open Hidex lid after analysis
+- name: Open Hidex plate reader lid after analysis
   node: hidex
   action: open
   args: {}
