@@ -8,7 +8,7 @@ This repository accompanies the PRISM paper and provides the **prompts and code*
 
 ## Overview
 
-![PRISM Overview](assets/prism_overview.png)
+![PRISM Overview](assets/prism_staged.png)
 
 **Figure:** *Overview of the PRISM framework for protocol generation and execution.  
 The system consists of three main stages: Protocol Planning, where user intent is converted into structured steps; Protocol Generation, where structured English instructions are transformed into robot-aware actions and iteratively refined through validation cycles in Omniverse before execution; and Real-World Execution, where the full pipeline is validated using the Luna qPCR protocol in our autonomous laboratory.*
